@@ -1,0 +1,32 @@
+package product
+
+import (
+	"net/http"
+	"strconv"
+	"ecommerce/util"
+)
+
+func (h *Handler) GetProduct(w http.ResponseWriter, r *http.Request) {
+	productID := r.PathValue("id")
+
+	pId, err := strconv.Atoi(productID)
+	if err != nil {
+		//http.Error(w, "Please give me a valid product id", http.StatusBadRequest)
+		util.SendError(w, http.StatusBadRequest, "Invalid req body")
+		return
+	}
+
+	product, err := h.productRepo.Get(pId)
+	if err != nil {
+		//http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		util.SendError(w, http.StatusInternalServerError, "Internal Server Error")
+		return
+	}
+
+	if product == nil {
+		util.SendError(w, http.StatusNotFound, "Product not found")  // 404
+		return
+	}
+
+	util.SendData(w, http.StatusOK, product) //200
+}
